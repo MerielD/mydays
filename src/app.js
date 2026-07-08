@@ -310,7 +310,7 @@ function wireEvents() {
 export function initApp() {
   const todayStr = getTodayIsoStr();
   const result = loadState(window.localStorage, todayStr);
-  currentState = result.state;
+  currentState = { ...result.state, selectedDate: todayStr };
   renderApp(currentState);
   wireEvents();
 }
