@@ -46,7 +46,7 @@ export function buildViewModel(state) {
     };
   });
 
-  return { fullDate, selectedThemeId, weekDates, theme, chips };
+  return { fullDate, selectedThemeId, selectedDate: state.selectedDate, weekDates, theme, chips };
 }
 
 /**
@@ -58,7 +58,7 @@ export function buildViewModel(state) {
 export function renderWeekStripHtml(viewModel) {
   return viewModel.chips
     .map((chip, i) => {
-      const active = chip.themeId === viewModel.selectedThemeId ? " active" : "";
+      const active = viewModel.weekDates[i] === viewModel.selectedDate ? " active" : "";
       return `<button class="chip${active}" data-date="${viewModel.weekDates[i]}">\n` +
         `            <strong>${chip.dateLabel}</strong>\n` +
         `            <span>${chip.name}</span>\n` +

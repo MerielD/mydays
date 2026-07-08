@@ -43,7 +43,7 @@ export const THEMES = Object.freeze([
   },
   {
     id: "callus",
-    name: "茧日",
+    name: "茧子日",
     defaultWeekday: 5,
     anchor: "hard",
     color: "#3f3f46",
@@ -51,7 +51,7 @@ export const THEMES = Object.freeze([
   },
   {
     id: "dog",
-    name: "狗日",
+    name: "小狗日",
     defaultWeekday: 6,
     anchor: "strong",
     color: "#0f766e",
