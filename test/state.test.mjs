@@ -30,6 +30,21 @@ test("date-specific theme override changes only that date", () => {
   assert.equal(getThemeIdForDate(state, "2026-07-09"), "brain");
 });
 
+test("setting a date to another theme swaps the default date's theme", () => {
+  // Wed=belly, changing to eye; Sun(=eye default) should become belly
+  const state = setThemeForDate(createState("2026-07-08"), "2026-07-08", "eye", "2026-07-08T10:00:00.000Z");
+  assert.equal(getThemeIdForDate(state, "2026-07-08"), "eye");
+  assert.equal(getThemeIdForDate(state, "2026-07-12"), "belly");
+});
+
+test("swap does not override an explicitly set theme on the default date", () => {
+  // Wed=belly → eye. But Sun already has an explicit override "neck"
+  const s1 = setThemeForDate(createState("2026-07-08"), "2026-07-12", "neck", "2026-07-12T10:00:00.000Z");
+  const s2 = setThemeForDate(s1, "2026-07-08", "eye", "2026-07-08T10:00:00.000Z");
+  assert.equal(getThemeIdForDate(s2, "2026-07-08"), "eye");
+  assert.equal(getThemeIdForDate(s2, "2026-07-12"), "neck"); // preserved, not overwritten
+});
+
 test("note is saved and read by date", () => {
   const state = setNoteForDate(createState("2026-07-08"), "2026-07-08", "今天认真吃了一顿饭。", "2026-07-08T10:00:00.000Z");
   assert.equal(getNoteForDate(state, "2026-07-08"), "今天认真吃了一顿饭。");

@@ -7,7 +7,7 @@
  * @module state
  */
 
-import { getIsoWeekday } from "./dates.js";
+import { getIsoWeekDates, getIsoWeekday } from "./dates.js";
 import { getDefaultThemeIdForWeekday, getThemeById } from "./themes.js";
 
 // ---------------------------------------------------------------------------
@@ -81,20 +81,48 @@ export function getThemeIdForDate(state, dateStr) {
 export function setThemeForDate(state, dateStr, themeId, updatedAt) {
   if (!getThemeById(themeId)) return state;
 
-  const existing = state.dailyRecordsByDate[dateStr];
-  const record = {
-    ...(existing || {}),
-    themeId,
-    updatedAt
-  };
+  const oldThemeId = getThemeIdForDate(state, dateStr);
+  if (oldThemeId === themeId) return state;
 
-  return {
-    ...state,
-    dailyRecordsByDate: {
-      ...state.dailyRecordsByDate,
-      [dateStr]: record
+  // Build a new dailyRecordsByDate, tracking what changed
+  const records = { ...state.dailyRecordsByDate };
+
+  // 1. Remove themeId override from any other date that has it
+  for (const [d, record] of Object.entries(records)) {
+    if (d !== dateStr && record.themeId === themeId) {
+      if (record.note) {
+        // Keep the note, strip themeId
+        const { themeId: _, ...cleaned } = record;
+        records[d] = cleaned;
+      } else {
+        delete records[d];
+      }
     }
-  };
+  }
+
+  // 2. If the new theme's default weekday falls on a different date
+  //    in the same week and that date has no override, swap old theme there
+  const theme = getThemeById(themeId);
+  const weekDates = getIsoWeekDates(dateStr);
+  const defaultDate = weekDates[theme.defaultWeekday - 1];
+
+  if (defaultDate !== dateStr) {
+    const existing = records[defaultDate];
+    if (!existing || !existing.themeId) {
+      // This date's natural theme is being taken — give it the old theme
+      records[defaultDate] = {
+        ...(existing || {}),
+        themeId: oldThemeId,
+        updatedAt
+      };
+    }
+  }
+
+  // 3. Set new theme on target date
+  const targetExisting = records[dateStr];
+  records[dateStr] = { ...(targetExisting || {}), themeId, updatedAt };
+
+  return { ...state, dailyRecordsByDate: records };
 }
 
 /**

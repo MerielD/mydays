@@ -88,7 +88,7 @@ export function containsForbiddenCopy(text) {
 export function renderThemePickerHtml(viewModel) {
   return THEMES.map(
     (t) =>
-      `<button class="theme-dot" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
+      `<button class="theme-btn" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
   ).join("\n");
 }
 
@@ -198,7 +198,7 @@ export function renderApp(state) {
       <section class="theme-row">
         ${THEMES.map(
           (t) =>
-            `<button class="theme-dot" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
+            `<button class="theme-btn" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
         ).join("\n        ")}
       </section>
       <section class="note a-note">

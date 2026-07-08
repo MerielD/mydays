@@ -241,7 +241,7 @@ button {
   flex-wrap: wrap;
 }
 
-.theme-dot {
+.theme-btn {
   border: 2px solid transparent;
   border-radius: 8px;
   width: 44px;
@@ -249,15 +249,15 @@ button {
   cursor: pointer;
 }
 
-.theme-dot:hover {
+.theme-btn:hover {
   filter: brightness(1.15);
 }
 
-.theme-dot:active {
+.theme-btn:active {
   filter: brightness(0.85);
 }
 
-.theme-dot.active {
+.theme-btn.active {
   border-color: var(--ink);
 }
 
