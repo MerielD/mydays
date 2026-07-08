@@ -1,4 +1,4 @@
-const CACHE = "mydays-v1";
+const CACHE = "mydays-v2";
 const ASSETS = ["index.html", "styles.css", "src/app.js", "src/state.js", "src/storage.js", "src/themes.js", "src/dates.js"];
 
 self.addEventListener("install", (e) => {
