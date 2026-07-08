@@ -60,8 +60,8 @@ export function renderWeekStripHtml(viewModel) {
     .map((chip, i) => {
       const active = viewModel.weekDates[i] === viewModel.selectedDate ? " active" : "";
       return `<button class="chip${active}" data-date="${viewModel.weekDates[i]}">\n` +
-        `            <strong>${chip.dateLabel}</strong>\n` +
-        `            <span>${chip.name}</span>\n` +
+        `            <strong>${chip.dateLabel} · ${chip.name}</strong>\n` +
+        `            <span>${chip.reminder}</span>\n` +
         `          </button>`;
     })
     .join("\n");
