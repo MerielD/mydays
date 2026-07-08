@@ -1,0 +1,19 @@
+# Dependencies and build output
+node_modules/
+dist/
+build/
+
+# Local environment files
+.env
+.env.*
+
+# Personal local data exports
+data/
+*.local.json
+mydays-export*.json
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
