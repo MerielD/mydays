@@ -161,6 +161,38 @@ export function getNoteForDate(state, dateStr) {
 }
 
 /**
+ * Remove the theme override for a date, falling back to its weekday default.
+ *
+ * - If the record has a note, keep the record but remove the themeId.
+ * - If the record has no note, remove the entire record.
+ * - If no override exists, return state unchanged.
+ *
+ * @param {import("./state.js").MyDaysState} state
+ * @param {string} dateStr — ISO date string
+ * @returns {import("./state.js").MyDaysState}
+ */
+export function clearThemeOverride(state, dateStr) {
+  const record = state.dailyRecordsByDate[dateStr];
+  if (!record || !record.themeId) return state;
+
+  if (record.note) {
+    // Keep the record but strip themeId
+    const { themeId: _, ...cleaned } = record;
+    return {
+      ...state,
+      dailyRecordsByDate: {
+        ...state.dailyRecordsByDate,
+        [dateStr]: cleaned
+      }
+    };
+  }
+
+  // No note — remove the record entirely
+  const { [dateStr]: _removed, ...rest } = state.dailyRecordsByDate;
+  return { ...state, dailyRecordsByDate: rest };
+}
+
+/**
  * Serialize the state as an export JSON string.
  *
  * @param {import("./state.js").MyDaysState} state

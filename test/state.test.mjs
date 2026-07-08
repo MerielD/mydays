@@ -7,7 +7,8 @@ import {
   setNoteForDate,
   getNoteForDate,
   exportBackup,
-  importBackup
+  importBackup,
+  clearThemeOverride
 } from "../src/state.js";
 
 test("createState uses schema v1 and selected date", () => {
@@ -72,4 +73,25 @@ test("importBackup rejects unknown theme ids", () => {
   const result = importBackup(current, JSON.stringify(payload));
   assert.equal(result.ok, false);
   assert.deepEqual(result.state, current);
+});
+
+test("clearThemeOverride removes themeId and falls back to weekday default", () => {
+  const state = setThemeForDate(createState("2026-07-08"), "2026-07-08", "eye", "2026-07-08T10:00:00.000Z");
+  assert.equal(getThemeIdForDate(state, "2026-07-08"), "eye");
+  const reset = clearThemeOverride(state, "2026-07-08");
+  assert.equal(getThemeIdForDate(reset, "2026-07-08"), "belly");
+});
+
+test("clearThemeOverride preserves note when removing themeId", () => {
+  const withNote = setNoteForDate(createState("2026-07-08"), "2026-07-08", "some note", "2026-07-08T10:00:00.000Z");
+  const both = setThemeForDate(withNote, "2026-07-08", "eye", "2026-07-08T10:00:00.000Z");
+  const reset = clearThemeOverride(both, "2026-07-08");
+  assert.equal(getThemeIdForDate(reset, "2026-07-08"), "belly");
+  assert.equal(getNoteForDate(reset, "2026-07-08"), "some note");
+});
+
+test("clearThemeOverride is no-op when no override exists", () => {
+  const state = createState("2026-07-08");
+  const reset = clearThemeOverride(state, "2026-07-08");
+  assert.deepEqual(reset, state);
 });

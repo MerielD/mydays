@@ -16,6 +16,14 @@ test("renderWeekStripHtml renders dates instead of weekday labels", () => {
   assert.equal(html.includes("周三"), false);
 });
 
+test("renderWeekStripHtml does not repeat reminder text in chips", () => {
+  const state = { schemaVersion: 1, selectedDate: "2026-07-08", dailyRecordsByDate: {} };
+  const html = renderWeekStripHtml(buildViewModel(state));
+  // Reminder text ("给耳朵一点新输入") should appear in the card, not in chips
+  assert.equal(html.includes("给耳朵一点新输入"), false);
+  assert.equal(html.includes("让脖子和肩背松一点"), false);
+});
+
 test("UI copy excludes forbidden task language", () => {
   const state = { schemaVersion: 1, selectedDate: "2026-07-08", dailyRecordsByDate: {} };
   const view = buildViewModel(state);

@@ -8,8 +8,8 @@
  */
 
 import { getIsoWeekDates, getIsoWeekday, formatFullDate, formatChipDate } from "./dates.js";
-import { THEMES, getThemeById, getDefaultThemeIdForWeekday } from "./themes.js";
-import { createState, getThemeIdForDate, setThemeForDate, setNoteForDate, getNoteForDate, exportBackup, importBackup } from "./state.js";
+import { getThemeById } from "./themes.js";
+import { createState, getThemeIdForDate, setNoteForDate, getNoteForDate, exportBackup, importBackup, clearThemeOverride } from "./state.js";
 import { loadState, saveState } from "./storage.js";
 
 // ---------------------------------------------------------------------------
@@ -60,8 +60,8 @@ export function renderWeekStripHtml(viewModel) {
     .map((chip, i) => {
       const active = viewModel.weekDates[i] === viewModel.selectedDate ? " active" : "";
       return `<button class="chip${active}" data-date="${viewModel.weekDates[i]}">\n` +
-        `            <strong>${chip.dateLabel} · ${chip.name}</strong>\n` +
-        `            <span>${chip.reminder}</span>\n` +
+        `            <strong>${chip.dateLabel}</strong>\n` +
+        `            <span>${chip.name}</span>\n` +
         `          </button>`;
     })
     .join("\n");
@@ -115,9 +115,6 @@ function getTodayIsoStr() {
 
 /** @type {import("./state.js").MyDaysState} */
 let currentState = null;
-
-/** @type {boolean} */
-let themePickerVisible = false;
 
 // ---------------------------------------------------------------------------
 // Event handlers
@@ -182,12 +179,6 @@ export function renderApp(state) {
           </div>
         </div>
       </section>
-      <section class="theme-picker${themePickerVisible ? " theme-picker--visible" : ""}" id="theme-picker">
-        ${THEMES.map(
-          (t) =>
-            `<button class="theme-btn" style="background: ${t.color}" data-theme-id="${t.id}" title="${t.name}">${t.name}</button>`
-        ).join("\n        ")}
-      </section>
       <section class="week a-week">${renderWeekStripHtml(view)}</section>
       <section class="note a-note">
         <label for="note-input">一句记录</label>
@@ -229,20 +220,10 @@ function wireEvents() {
       return;
     }
 
-    // Theme button click
-    const themeBtn = e.target.closest("[data-theme-id]");
-    if (themeBtn) {
-      const themeId = themeBtn.dataset.themeId;
-      currentState = setThemeForDate(currentState, currentState.selectedDate, themeId, new Date().toISOString());
-      saveState(window.localStorage, currentState);
-      themePickerVisible = false;
-      renderApp(currentState);
-      return;
-    }
-
-    // Toggle theme picker
+    // "换今天" — reset selected date to its default weekday theme
     if (e.target.id === "btn-change-theme") {
-      themePickerVisible = !themePickerVisible;
+      currentState = clearThemeOverride(currentState, currentState.selectedDate);
+      saveState(window.localStorage, currentState);
       renderApp(currentState);
       return;
     }
