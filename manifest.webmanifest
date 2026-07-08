@@ -1,0 +1,9 @@
+{
+  "name": "MyDays",
+  "short_name": "MyDays",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f7f7f2",
+  "theme_color": "#f7f7f2",
+  "description": "A personal daily sensory surface for the week."
+}
