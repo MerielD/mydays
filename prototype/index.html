@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MyDays Prototype</title>
+    <style>
+      /*
+        PROTOTYPE - throwaway UI sketch.
+        Question: three radically different MyDays first-screen directions,
+        switchable via ?variant= on this prototype route.
+      */
+      :root {
+        --shell-bg: #f7f7f2;
+        --ink: #202124;
+        --muted: #62625d;
+        --line: #deded6;
+        --ear: #1d5fd1;
+        --neck: #15803d;
+        --belly: #d95f02;
+        --brain: #4f46e5;
+        --callus: #3f3f46;
+        --dog: #0f766e;
+        --eye: #be185d;
+        --today: var(--belly);
+        --font: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--shell-bg);
+        color: var(--ink);
+        font-family: var(--font);
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        min-height: 100vh;
+        padding: 18px 16px 96px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 980px;
+        margin: 0 auto 16px;
+        color: var(--muted);
+      }
+
+      .brand {
+        color: var(--ink);
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .date {
+        font-size: 14px;
+      }
+
+      .btn {
+        border: 1px solid rgba(32, 33, 36, 0.16);
+        border-radius: 8px;
+        background: #fffdf7;
+        color: var(--ink);
+        min-height: 44px;
+        padding: 0 14px;
+        font-weight: 700;
+      }
+
+      .btn-dark {
+        border-color: rgba(255, 255, 255, 0.32);
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      .week {
+        display: grid;
+        gap: 8px;
+      }
+
+      .chip {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fffdf7;
+        color: var(--ink);
+        min-height: 48px;
+        padding: 8px 10px;
+        text-align: left;
+      }
+
+      .chip strong {
+        display: block;
+        font-size: 13px;
+      }
+
+      .chip span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .chip.active {
+        border-color: var(--today);
+        box-shadow: inset 0 0 0 2px var(--today);
+      }
+
+      .note {
+        display: grid;
+        gap: 8px;
+      }
+
+      .note label {
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .note input {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fffdf7;
+        min-height: 46px;
+        padding: 0 12px;
+        color: var(--ink);
+      }
+
+      .state-panel {
+        border: 1px dashed rgba(32, 33, 36, 0.28);
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+      }
+
+      .variant {
+        max-width: 980px;
+        margin: 0 auto;
+      }
+
+      /* Variant A: poster-like daily surface. */
+      .variant-a {
+        display: grid;
+        gap: 16px;
+      }
+
+      .a-today {
+        min-height: 56vh;
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 42%),
+          repeating-linear-gradient(
+            115deg,
+            rgba(255, 255, 255, 0.16) 0,
+            rgba(255, 255, 255, 0.16) 1px,
+            transparent 1px,
+            transparent 18px
+          ),
+          var(--today);
+        color: #fff;
+        padding: 28px;
+        display: grid;
+        align-content: space-between;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .a-today > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .a-kicker {
+        font-size: 14px;
+        opacity: 0.86;
+        font-weight: 700;
+      }
+
+      .a-title {
+        margin: 16px 0 12px;
+        font-size: 56px;
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .a-copy {
+        margin: 0;
+        max-width: 560px;
+        font-size: 18px;
+        line-height: 1.5;
+      }
+
+      .a-bottom {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .a-date-mark {
+        display: grid;
+        gap: 4px;
+        justify-items: end;
+        opacity: 0.9;
+      }
+
+      .a-date-mark strong {
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .a-week {
+        grid-template-columns: repeat(7, minmax(92px, 1fr));
+        overflow-x: auto;
+      }
+
+      .a-note {
+        max-width: 680px;
+      }
+
+      /* Variant B: operational compact surface. */
+      .variant-b {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 14px;
+      }
+
+      .b-rail {
+        border-right: 1px solid var(--line);
+        padding-right: 12px;
+        display: grid;
+        gap: 8px;
+        align-content: start;
+      }
+
+      .b-main {
+        display: grid;
+        gap: 14px;
+      }
+
+      .b-today {
+        border-left: 8px solid var(--today);
+        background: #fffdf7;
+        border-radius: 8px;
+        padding: 24px;
+      }
+
+      .b-title {
+        margin: 0;
+        font-size: 44px;
+        line-height: 1;
+      }
+
+      .b-copy {
+        margin: 14px 0 20px;
+        max-width: 640px;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .b-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .b-panel {
+        background: #fffdf7;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      /* Variant C: timeline-first week rhythm. */
+      .variant-c {
+        display: grid;
+        gap: 18px;
+      }
+
+      .c-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 220px;
+        gap: 16px;
+        align-items: stretch;
+      }
+
+      .c-title-block {
+        background: #fffdf7;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 24px;
+      }
+
+      .c-title {
+        margin: 0;
+        color: var(--today);
+        font-size: 48px;
+        line-height: 1;
+      }
+
+      .c-copy {
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.5;
+      }
+
+      .c-action {
+        background: var(--today);
+        color: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        display: grid;
+        align-content: space-between;
+      }
+
+      .c-timeline {
+        display: grid;
+        gap: 10px;
+      }
+
+      .c-row {
+        display: grid;
+        grid-template-columns: 54px 10px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .c-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--color);
+      }
+
+      .c-row-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fffdf7;
+        padding: 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .c-row.active .c-row-card {
+        border-color: var(--today);
+        box-shadow: inset 0 0 0 2px var(--today);
+      }
+
+      .c-lower {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 14px;
+      }
+
+      .switcher {
+        position: fixed;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        z-index: 20;
+        background: #202124;
+        color: #fff;
+        border-radius: 999px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+        padding: 8px;
+        display: grid;
+        grid-template-columns: 44px minmax(180px, 1fr) 44px;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .switcher button {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        border: 0;
+        background: #fff;
+        color: #202124;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .switcher-label {
+        text-align: center;
+        font-size: 13px;
+        line-height: 1.25;
+      }
+
+      .switcher-label strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      @media (max-width: 720px) {
+        .app {
+          padding: 14px 12px 96px;
+        }
+
+        .a-today {
+          min-height: 52vh;
+          padding: 22px;
+        }
+
+        .a-title,
+        .b-title,
+        .c-title {
+          font-size: 42px;
+        }
+
+        .a-bottom,
+        .b-grid,
+        .c-hero,
+        .c-lower,
+        .variant-b {
+          grid-template-columns: 1fr;
+        }
+
+        .b-rail {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+          padding-right: 0;
+          padding-bottom: 10px;
+          grid-template-columns: repeat(7, minmax(102px, 1fr));
+          overflow-x: auto;
+        }
+
+        .a-week {
+          grid-template-columns: repeat(7, minmax(106px, 1fr));
+        }
+
+        .switcher {
+          width: calc(100% - 24px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="app"></div>
+    <script>
+      const variants = [
+        ["A", "Daily poster"],
+        ["B", "Compact console"],
+        ["C", "Week timeline"],
+      ];
+
+      const days = [
+        { dateLabel: "07.06", id: "ear", name: "耳朵日", color: "var(--ear)", reminder: "给耳朵一点新输入：一首新歌或一段播客就够。" },
+        { dateLabel: "07.07", id: "neck", name: "脖子日", color: "var(--neck)", reminder: "让脖子和肩背松一点：拉伸五分钟也算。" },
+        { dateLabel: "07.08", id: "belly", name: "肚子日", color: "var(--belly)", reminder: "给身体一次明确补给：认真吃一顿或喝点有味道的东西。" },
+        { dateLabel: "07.09", id: "brain", name: "脑子日", color: "var(--brain)", reminder: "把脑子从工作逻辑里拿出来：读几页文字或安静想一会儿。" },
+        { dateLabel: "07.10", id: "callus", name: "茧子日", color: "var(--callus)", reminder: "离开键盘，用笔写几行，感受纸面的阻力。" },
+        { dateLabel: "07.11", id: "dog", name: "小狗日", color: "var(--dog)", reminder: "给福袋一段高质量探索时间，让他跑、闻、决定路线。" },
+        { dateLabel: "07.12", id: "eye", name: "眼睛日", color: "var(--eye)", reminder: "给眼睛一段新的视觉输入：一集剧、一个纪录片片段或一场电影。" },
+      ];
+
+      const state = {
+        selectedDate: "2026-07-08",
+        displayDate: "2026年7月8日",
+        selectedThemeId: "belly",
+        note: "今天只认真吃了一顿饭，但有效。",
+        persistence: "none - prototype memory only",
+      };
+
+      function currentVariant() {
+        const param = new URLSearchParams(location.search).get("variant") || "A";
+        return variants.some(([key]) => key === param) ? param : "A";
+      }
+
+      function selectedTheme() {
+        return days.find((day) => day.id === state.selectedThemeId) || days[2];
+      }
+
+      function setTheme(id) {
+        state.selectedThemeId = id;
+        render();
+      }
+
+      function setVariant(key) {
+        const url = new URL(location.href);
+        url.searchParams.set("variant", key);
+        history.replaceState(null, "", url);
+        render();
+      }
+
+      function cycle(delta) {
+        const current = currentVariant();
+        const index = variants.findIndex(([key]) => key === current);
+        const next = variants[(index + delta + variants.length) % variants.length][0];
+        setVariant(next);
+      }
+
+      function topbar() {
+        return `
+          <header class="topbar">
+            <div class="brand">MyDays</div>
+            <div class="date">${state.displayDate}</div>
+          </header>
+        `;
+      }
+
+      function weekChip(day, compact = false) {
+        const active = day.id === state.selectedThemeId ? " active" : "";
+        return `
+          <button class="chip${active}" style="--color:${day.color}" onclick="setTheme('${day.id}')">
+            <strong>${compact ? day.dateLabel : `${day.dateLabel} · ${day.name}`}</strong>
+            <span>${compact ? day.name : day.reminder}</span>
+          </button>
+        `;
+      }
+
+      function note() {
+        return `
+          <section class="note">
+            <label for="note">本周备注</label>
+            <input id="note" value="${state.note}" oninput="state.note=this.value; renderStateOnly()" />
+          </section>
+        `;
+      }
+
+      function statePanel(variant) {
+        return `
+          <section class="state-panel" id="state-panel">STATE
+                variant: ${variant}
+selectedDate: ${state.selectedDate}
+selectedThemeId: ${state.selectedThemeId}
+note: ${state.note}
+persistence: ${state.persistence}</section>
+        `;
+      }
+
+      function renderStateOnly() {
+        const panel = document.getElementById("state-panel");
+        if (panel) panel.textContent = `STATE
+variant: ${currentVariant()}
+selectedDate: ${state.selectedDate}
+selectedThemeId: ${state.selectedThemeId}
+note: ${state.note}
+persistence: ${state.persistence}`;
+      }
+
+      function variantA() {
+        const theme = selectedTheme();
+        return `
+          <main class="variant variant-a" style="--today:${theme.color}">
+            <section class="a-today">
+              <div>
+                <div class="a-kicker">${state.displayDate}</div>
+                <h1 class="a-title">${theme.name}</h1>
+                <p class="a-copy">${theme.reminder}</p>
+              </div>
+              <div class="a-bottom">
+                <button class="btn btn-dark" onclick="cycle(1)">换今天</button>
+                <div class="a-date-mark">
+                  <span>Today</span>
+                  <strong>07.08</strong>
+                </div>
+              </div>
+            </section>
+            <section class="week a-week">${days.map((day) => weekChip(day)).join("")}</section>
+            ${note()}
+            ${statePanel("A - Daily poster")}
+          </main>
+        `;
+      }
+
+      function variantB() {
+        const theme = selectedTheme();
+        return `
+          <main class="variant variant-b" style="--today:${theme.color}">
+            <aside class="b-rail">${days.map((day) => weekChip(day, true)).join("")}</aside>
+            <section class="b-main">
+              <section class="b-today">
+                <h1 class="b-title">${theme.name}</h1>
+                <p class="b-copy">${theme.reminder}</p>
+                <button class="btn" onclick="cycle(1)">换今天</button>
+              </section>
+              <section class="b-grid">
+                <div class="b-panel">${note()}</div>
+                <div class="b-panel">${statePanel("B - Compact console")}</div>
+              </section>
+            </section>
+          </main>
+        `;
+      }
+
+      function variantC() {
+        const theme = selectedTheme();
+        return `
+          <main class="variant variant-c" style="--today:${theme.color}">
+            <section class="c-hero">
+              <div class="c-title-block">
+                <h1 class="c-title">${theme.name}</h1>
+                <p class="c-copy">${theme.reminder}</p>
+              </div>
+              <div class="c-action">
+                <div>
+                  <strong>Today</strong>
+                  <p>${state.displayDate}</p>
+                </div>
+                <button class="btn btn-dark" onclick="cycle(1)">换今天</button>
+              </div>
+            </section>
+            <section class="c-timeline">
+              ${days.map((day) => `
+                <button class="c-row ${day.id === state.selectedThemeId ? "active" : ""}" onclick="setTheme('${day.id}')">
+                  <strong>${day.dateLabel}</strong>
+                  <span class="c-dot" style="--color:${day.color}"></span>
+                  <span class="c-row-card"><strong>${day.name}</strong><span>${day.reminder}</span></span>
+                </button>
+              `).join("")}
+            </section>
+            <section class="c-lower">
+              ${note()}
+              ${statePanel("C - Week timeline")}
+            </section>
+          </main>
+        `;
+      }
+
+      function switcher() {
+        const key = currentVariant();
+        const label = variants.find(([variant]) => variant === key)?.[1] || "";
+        return `
+          <nav class="switcher" aria-label="Prototype variants">
+            <button onclick="cycle(-1)" aria-label="Previous variant">←</button>
+            <div class="switcher-label"><strong>${key} — ${label}</strong><span>?variant=${key}</span></div>
+            <button onclick="cycle(1)" aria-label="Next variant">→</button>
+          </nav>
+        `;
+      }
+
+      function render() {
+        const key = currentVariant();
+        const view = key === "B" ? variantB() : key === "C" ? variantC() : variantA();
+        document.getElementById("app").innerHTML = `${topbar()}${view}${switcher()}`;
+      }
+
+      window.setTheme = setTheme;
+      window.setVariant = setVariant;
+      window.cycle = cycle;
+      window.state = state;
+      window.renderStateOnly = renderStateOnly;
+
+      window.addEventListener("keydown", (event) => {
+        const tag = event.target?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || event.target?.isContentEditable) return;
+        if (event.key === "ArrowLeft") cycle(-1);
+        if (event.key === "ArrowRight") cycle(1);
+      });
+
+      window.addEventListener("popstate", render);
+      render();
+    </script>
+  </body>
+</html>

@@ -8,8 +8,8 @@
  */
 
 import { getIsoWeekDates, getIsoWeekday, formatFullDate, formatChipDate } from "./dates.js";
-import { getThemeById } from "./themes.js";
-import { createState, getThemeIdForDate, setNoteForDate, getNoteForDate, exportBackup, importBackup, clearThemeOverride } from "./state.js";
+import { THEMES, getThemeById } from "./themes.js";
+import { createState, getThemeIdForDate, setThemeForDate, setNoteForDate, getNoteForDate, exportBackup, importBackup, clearThemeOverride } from "./state.js";
 import { loadState, saveState } from "./storage.js";
 
 // ---------------------------------------------------------------------------
@@ -17,6 +17,8 @@ import { loadState, saveState } from "./storage.js";
 // ---------------------------------------------------------------------------
 
 const FORBIDDEN = ["不是任务", "只要一点点就算数", "完成", "打卡", "目标", "进度", "失败"];
+
+export const IMPORT_ERROR_MESSAGE = "导入未成功：备份文件格式不正确。";
 
 // ---------------------------------------------------------------------------
 // Pure helpers (testable in Node)
@@ -75,6 +77,19 @@ export function renderWeekStripHtml(viewModel) {
  */
 export function containsForbiddenCopy(text) {
   return FORBIDDEN.some((word) => text.includes(word));
+}
+
+/**
+ * Render the theme picker row HTML from a view model.
+ *
+ * @param {{ theme: { id: string } }} viewModel
+ * @returns {string} — HTML string
+ */
+export function renderThemePickerHtml(viewModel) {
+  return THEMES.map(
+    (t) =>
+      `<button class="theme-dot" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
+  ).join("\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -141,7 +156,7 @@ function handleImportFile(file) {
       renderApp(currentState);
     } else {
       // eslint-disable-next-line no-alert
-      alert("导入失败：备份文件格式不正确。");
+      alert(IMPORT_ERROR_MESSAGE);
     }
   };
   reader.readAsText(file);
@@ -180,6 +195,12 @@ export function renderApp(state) {
         </div>
       </section>
       <section class="week a-week">${renderWeekStripHtml(view)}</section>
+      <section class="theme-row">
+        ${THEMES.map(
+          (t) =>
+            `<button class="theme-dot" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
+        ).join("\n        ")}
+      </section>
       <section class="note a-note">
         <label for="note-input">一句记录</label>
         <input id="note-input" value="${noteValue}" />
@@ -216,6 +237,16 @@ function wireEvents() {
     if (chip && chip.dataset.date) {
       const newDate = chip.dataset.date;
       currentState = { ...currentState, selectedDate: newDate };
+      renderApp(currentState);
+      return;
+    }
+
+    // Theme dot click — set current date's theme override
+    const themeDot = e.target.closest("[data-theme-id]");
+    if (themeDot) {
+      const themeId = themeDot.dataset.themeId;
+      currentState = setThemeForDate(currentState, currentState.selectedDate, themeId, new Date().toISOString());
+      saveState(window.localStorage, currentState);
       renderApp(currentState);
       return;
     }
