@@ -9,7 +9,7 @@
 
 import { getIsoWeekDates, getIsoWeekday, formatFullDate, formatChipDate } from "./dates.js";
 import { THEMES, getThemeById } from "./themes.js";
-import { createState, getThemeIdForDate, setThemeForDate, setNoteForDate, getNoteForDate, exportBackup, importBackup, clearThemeOverride } from "./state.js";
+import { createState, getThemeIdForDate, setThemeForDate, setNoteForDate, getNoteForDate, exportBackup, importBackup } from "./state.js";
 import { loadState, saveState } from "./storage.js";
 
 // ---------------------------------------------------------------------------
@@ -87,8 +87,10 @@ export function containsForbiddenCopy(text) {
  */
 export function renderThemePickerHtml(viewModel) {
   return THEMES.map(
-    (t) =>
-      `<button class="theme-btn" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
+    (theme) => {
+      const active = theme.id === viewModel.selectedThemeId ? " active" : "";
+      return `<button class="theme-btn${active}" type="button" style="background:${theme.color}" data-theme-id="${theme.id}">${theme.name}</button>`;
+    }
   ).join("\n");
 }
 
@@ -194,13 +196,10 @@ export function renderApp(state) {
           </div>
         </div>
       </section>
-      <section class="week a-week">${renderWeekStripHtml(view)}</section>
-      <section class="theme-row">
-        ${THEMES.map(
-          (t) =>
-            `<button class="theme-btn" style="background:${t.color}" data-theme-id="${t.id}" title="${t.name}"></button>`
-        ).join("\n        ")}
+      <section class="theme-picker" id="theme-picker" aria-label="选择今天">
+        ${renderThemePickerHtml(view)}
       </section>
+      <section class="week a-week">${renderWeekStripHtml(view)}</section>
       <section class="note a-note">
         <label for="note-input">一句记录</label>
         <input id="note-input" value="${noteValue}" />
@@ -241,21 +240,19 @@ function wireEvents() {
       return;
     }
 
-    // Theme dot click — set current date's theme override
-    const themeDot = e.target.closest("[data-theme-id]");
-    if (themeDot) {
-      const themeId = themeDot.dataset.themeId;
+    // Theme button click — set current date's theme override.
+    const themeButton = e.target.closest(".theme-btn");
+    if (themeButton && themeButton.dataset.themeId) {
+      const themeId = themeButton.dataset.themeId;
       currentState = setThemeForDate(currentState, currentState.selectedDate, themeId, new Date().toISOString());
       saveState(window.localStorage, currentState);
       renderApp(currentState);
       return;
     }
 
-    // "换今天" — reset selected date to its default weekday theme
+    // "换今天" — open or close the seven-theme picker.
     if (e.target.id === "btn-change-theme") {
-      currentState = clearThemeOverride(currentState, currentState.selectedDate);
-      saveState(window.localStorage, currentState);
-      renderApp(currentState);
+      document.getElementById("theme-picker")?.classList.toggle("theme-picker--visible");
       return;
     }
 
