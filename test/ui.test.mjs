@@ -35,6 +35,8 @@ test("renderThemePickerHtml renders seven theme choices", () => {
   const html = renderThemePickerHtml(buildViewModel(state));
   assert.equal((html.match(/data-theme-id=/g) ?? []).length, 7);
   assert.equal((html.match(/class="theme-btn/g) ?? []).length, 7);
+  assert.equal(html.includes(">耳朵日</button>"), true);
+  assert.equal(html.includes(">眼睛日</button>"), true);
   assert.equal(html.includes("耳朵日"), true);
   assert.equal(html.includes("眼睛日"), true);
   assert.equal(containsForbiddenCopy(html), false);

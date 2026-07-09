@@ -233,33 +233,12 @@ button {
   filter: brightness(0.85);
 }
 
-/* -- Note input -- */
-
-.theme-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.theme-btn {
-  border: 2px solid transparent;
-  border-radius: 8px;
-  width: 44px;
-  height: 44px;
-  cursor: pointer;
-}
-
-.theme-btn:hover {
-  filter: brightness(1.15);
-}
-
-.theme-btn:active {
-  filter: brightness(0.85);
-}
-
 .theme-btn.active {
-  border-color: var(--ink);
+  outline: 3px solid rgba(32, 33, 36, 0.3);
+  outline-offset: 2px;
 }
+
+/* -- Note input -- */
 
 .note {
   display: grid;
